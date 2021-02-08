@@ -5,10 +5,10 @@ char **AlocaMatriz(int m, int n);
 
 char **randon()
 {
-    char **string = AlocaMatriz(1000000, 5);
+    char **string = AlocaMatriz(1000, 5);
     char aux[5];
     puts("gravando numeros");
-    for (int y = 0; y < 1000000; y++)
+    for (int y = 0; y < 1000; y++)
     {
 
         int a = (rand() % 1001);
@@ -28,7 +28,7 @@ char **AlocaMatriz(int m, int n)
 {
     char **M;
     int i;
-    char aux[1000];
+    char aux[5];
     M = (char **)malloc(sizeof(char *) * m);
     if (M == NULL)
     {
@@ -45,6 +45,12 @@ char **AlocaMatriz(int m, int n)
         }
     }
 
-    puts("saiu");
+  
     return M;
+}
+void LiberaMatriz(char **M, int m){
+  int i;
+  for(i = 0; i < m; i++)
+    free(M[i]);
+  free(M);
 }

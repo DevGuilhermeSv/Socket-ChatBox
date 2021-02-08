@@ -4,21 +4,22 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <semaphore.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 #include "mensagem.c"
 
-//tamanho do buffer
-#define TAM 1000
+//variavel global de string
+char **STRING;
 //defique o socket de comunicação
 int skt;
 
 void *servidor(void *thread);
 int writing();
 
-void *func_GUI(void *threads_GUI)
+void *func_CLI(void *thread_CLI)
 {
-	int num = *(int *)threads_GUI;
+	int num = *(int *)thread_CLI;
 
 	printf("Thread rodando %d \n", num);
 	puts("chat disponivel");
@@ -27,53 +28,59 @@ void *func_GUI(void *threads_GUI)
 
 	if (skt != 1)
 	{
-		
 
-			writing();
-		
+		writing();
 	}
 }
 int writing()
 {
-	sleep(2);
-	char** string = randon();
-	printf("%ld ",sizeof(string));
-	int _Write = write(skt, string, 1000000);
-	if(_Write == -1){
-		puts("Error ao enviar");
+	for (size_t i = 0; i < 1000; i++)
+	{
+		
+		int _Write = write(skt, STRING[i], 5);
+		if (_Write == -1)
+		{
+			puts("Error ao enviar");
+		}
 	}
-	else puts("Enviado"); 
+	int _Write = write(skt, "-1", 5);
+
+	puts("Enviado");
 	//bzero(buffer_in, sizeof(buffer_in));
 
 	return 0;
 }
 void *reading(void *threads)
 {
+	int num = *(int *)threads;
+	char buffer_out[1000];
 	while (1)
 	{
-		int num = *(int *)threads;
-		char buffer_out[TAM];
-		read(skt, buffer_out, sizeof(buffer_out));
-		puts(buffer_out);
+		if ((read(skt, buffer_out, sizeof(buffer_out))) > 0)
+		{
+
+			puts(buffer_out);
+			return 0;
+		}
 	}
 }
 
 int main(int argc, char const *argv[])
 {
-
-	pthread_t threads_GUI, thread_read;
+	STRING = randon();
+	pthread_t thread_CLI, thread_read;
 	pthread_t threads_server;
-	
+
 	int id = 1, id2 = 2;
 	pthread_create(&threads_server, NULL, servidor, (void *)&id2);
 	pthread_join(threads_server, NULL);
-	pthread_create(&threads_GUI, NULL, func_GUI, (void *)&id);
-	//pthread_create(&thread_read, NULL, reading, (void *)&id);
+	pthread_create(&thread_CLI, NULL, func_CLI, (void *)&id);
+	pthread_create(&thread_read, NULL, reading, (void *)&id);
 
-	//pthread_create(&threads_GUI[1],NULL,func_comunicacao,(void*)&id[1]);
+	//pthread_create(&thread_CLI[1],NULL,func_comunicacao,(void*)&id[1]);
 
-	pthread_join(threads_GUI, NULL);
-	//pthread_join(thread_read, NULL);
+	pthread_join(thread_CLI, NULL);
+	pthread_join(thread_read, NULL);
 
 	return 0;
 }
@@ -106,8 +113,8 @@ void *servidor(void *thread)
 		sleep(2);
 		skt = 1;
 	}
-	
-		skt = socket_com;
+
+	skt = socket_com;
 
 	return 0;
 }

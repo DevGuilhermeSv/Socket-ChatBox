@@ -17,7 +17,7 @@ pthread_mutex_t meu_mutex;
 
 void *servidor(void *thread);
 int disparo();
-
+int writing(int time, int value, int socket);
 void *func_GUI(void *threads_GUI)
 {
 	int num = *(int *)threads_GUI;
@@ -35,27 +35,72 @@ void *func_GUI(void *threads_GUI)
 		}
 	}
 }
-int soma(char **string,int length)
+int soma(char **string, int length)
 {
-	int somatorio=0;
+	int somatorio = 0;
 	for (size_t i = 0; i < length; i++)
 	{
-			//somatorio += atoi(string[i]);
-			puts(string[i]);
+		//somatorio += atoi(string[i]);
+		puts(string[i]);
 	}
 	return somatorio;
 }
 void *reading(void *threads)
 {
+	sleep(2);
 	clock_t t;
 	t = clock();
-	int num = *(int *)threads;
-	char **string = AlocaMatriz(1000000, 5);
-	read(num, string, 1000000);
-	printf("Somatorio: %s",string[10]);
-	t = clock() - t;
+	int somatorio = 0, rd,i=0;
+	int socket = *(int *)threads;
+	char **string = AlocaMatriz(1000, 5);
+	char aux[5];
+	while (1)
+	{
+		if (rd = read(socket, aux, 5) > 0)
+		{
+			
+				if (strcmp(aux, "-1") != 0)
+				{
+					string[i] = aux;
 
-	printf("Tempo para o cliente %d: %lf\n", num, (double)t);
+					//printf("recebido: %s", string[i]);
+					somatorio += atoi(string[i]);
+					i++;
+				}
+				else
+				{
+					
+					t = clock() - t;
+					writing(t, somatorio, socket);
+					break;
+
+				}
+			
+		}
+	}
+}
+int writing(int time, int value, int socket)
+{
+	
+	char MsgRetorno[1000] = "Tempo de calculo: ";
+	char aux[100];
+	sprintf(aux, "%d", time);
+	
+	strcat(MsgRetorno, aux);
+	strcat(MsgRetorno, " com o resultado: ");
+		
+	sprintf(aux, "%d", value);
+	strcat(MsgRetorno, aux);
+	puts("enviando resposta");
+	int _Write = write(socket, MsgRetorno, 1000);
+	if (_Write == -1)
+	{
+		puts("Error ao enviar");
+	}
+
+	puts("Enviado");
+	
+	return 0;
 }
 
 int main(int argc, char const *argv[])
@@ -128,7 +173,7 @@ void *servidor(void *thread)
 		}
 		else
 		{
-			puts("entrou");
+			printf("socket_cliente: %d\n", socket_cliente);
 			pthread_t thread_read;
 			pthread_create(&thread_read, NULL, reading, (void *)&socket_cliente);
 			pthread_join(thread_read, NULL);
