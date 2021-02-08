@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 char **AlocaMatriz(int m, int n);
-
+//adiciona numeros aleatorios à matriz
 char **randon()
 {
     char **string = AlocaMatriz(1000, 5);
@@ -23,7 +23,7 @@ char **randon()
 
     return string;
 }
-
+//Aloca uma matriz de char na memoria
 char **AlocaMatriz(int m, int n)
 {
     char **M;
